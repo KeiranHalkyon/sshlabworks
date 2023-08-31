@@ -2,7 +2,7 @@
 102|Jane Smith|Electrical Engineering|9.2
 103|Michael Johnson|Mechanical Engineering|7.8
 104|Emily Brown|Chemistry|9.7
-107|Robert Davis|Economics|7.2
+107|Bishal Harami|CSE|6.9
 108|Olivia Wilson|History|8.8
 109|William Taylor|Biology|7.6
 110|Sophia Anderson|English Literature|9.0

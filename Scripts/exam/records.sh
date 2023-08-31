@@ -19,7 +19,7 @@ insert () {
 
 del () {
 	read -p "Enter roll no. to delete : " roll
-	ln=`grep -v $roll $fl`
+	ln=`grep -v "^$roll|" $fl`
 	#if [ $? -eq 0 ]; then
 	#	ln=`echo $ln | cut -d: -f1`
 	#	echo "Entry deleted"
@@ -37,13 +37,23 @@ del () {
 
 update () {
 	read -p "Enter roll no. to update : " roll
-	ln=`grep -v $roll $fl`
-	read -p "Enter new name : " name
-        read -p "Enter new Dept : " dept
-        read -p "Enter new SGPA : " sgpa
-	echo "$ln" > "$fl"
-	echo "$roll|$name|$dept|$sgpa" >> $fl
-	echo "Entry updated"
+	ln=`grep -n "^$roll|" $fl`
+	if [ $? -eq 1 ]; then
+		echo "$roll not found"
+	else
+		read -p "Enter new name : " name
+	        read -p "Enter new Dept : " dept
+	        read -p "Enter new SGPA : " sgpa
+		v=`echo $ln | cut -d: -f1`
+		up=$(head -n $(expr $v - 1) $fl)
+		flc=`wc -l $fl | cut -d' ' -f1`
+		down=$(tail -n $(expr $flc - $v) $fl)
+		
+		echo "$up" > "$fl"
+		echo "$roll|$name|$dept|$sgpa" >> $fl
+		echo "$down" >> $fl
+		echo "Entry updated"
+	fi
 }
 
 while : ; do
