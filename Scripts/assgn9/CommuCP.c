@@ -12,7 +12,7 @@ int main(){
 	memset(buffer, '\0', sizeof(buffer));
 	//printf("hi\n");
 	if (pipe(file_pipes)==0){
-		fork_result == fork();
+		fork_result = fork();
 		printf("hi\n");
 		if(fork_result == -1){
 			fprintf(stderr, "fork_failure");
