@@ -17,7 +17,7 @@ class Thread2{
 		System.out.println("In Main");
 		Thread t1 = new Thread(new ThreadX(),"Child");
 		t1.start();
-		t1.join();//waits for child t1 to wait
+		t1.join();//waits for child t1 to end
 		System.out.println("Main Ended");
 	}
 }
