@@ -24,6 +24,7 @@ void printTabr(int ac, int frames, int *arr, char isHit, int lr){
 int FIFO(int frames, int count, int *arr, int pr){
 	int *fr=(int*)calloc(frames, sizeof(int));
 	int wr=0, hit=0;
+	if(pr==1) printf("\n\nFIFO : frames = %d\n",frames);
 	printTabh(frames,pr);
 	for(int i=0;i<count;i++){
 		char isHit;
@@ -58,6 +59,7 @@ int max(int *arr, int lim){
 int LRU(int frames, int count, int *arr, int pr){
 	int *fr=(int*)calloc(frames*2,sizeof(int));
 	int hit=0;
+	if(pr==1) printf("\n\nLRU : frames = %d\n",frames);
 	printTabh(frames, pr);
 	for(int i=0; i<count; i++){
 		char isHit;
@@ -80,6 +82,7 @@ int LRU(int frames, int count, int *arr, int pr){
 int OPT(int frames, int count, int *arr, int pr){
 	int *fr=(int*)calloc(frames,sizeof(int));
 	int hit=0;
+	if(pr==1) printf("\n\nOPT : frames = %d\n",frames);
 	printTabh(frames, pr);
 	for(int i=0; i<count; i++){
 		char isHit;
@@ -137,32 +140,45 @@ int main(){
 	printf("Hits : %d\n",OPT(fr,c,ar,1));*/
 	/*int arr[]={1,2,3,1,2,3};
 	graph(3,arr,0);*/
-	int c, fm, fs, ch=0;
+	int c, fm, fs, ch=0, full, pr=1;
 	printf("Enter no. of access : ");
 	scanf("%d",&c);
 	int *arr=(int*)calloc(c,sizeof(int));
+	printf("Enter %d pages : ", c);
 	for(int i=0;i<c;i++){
-		printf("Enter %d : ", i+1);
+		//printf("Enter %d : ", i+1);
 		scanf("%d",&arr[i]);
 	}
-	printf("Enter max and min no. of frames : ");
-	scanf("%d %d", &fm, &fs);
-	int full = fm-fs+1;
+	printf("Enter min and max no. of frames : ");
+	scanf("%d %d", &fs, &fm);
+	full = fm-fs+1;
 	int *hitf=(int*)calloc(full*2,sizeof(int));
 	for(int i=0;i<full;i++)
 		hitf[i]=fs+i;
-	while(ch!=-1){
-		printf("1. FIFO\n2. OPT\n3. LRU\n Enter choice : ");
+	while(ch!=5){
+		printf("1. FIFO\n2. OPT\n3. LRU\n4. Toggle Table Print\n5. Exit\nEnter choice : ");
 		scanf("%d",&ch);
-		printf("hi");
+		printf("\n");
 		switch(ch){
-			case 1:for(int i = 0;i < full;i++){
-					printf("FIFO frames = %d\n", fs+i);
-					//hitf[full+i] = FIFO(fs+i,c,arr,1);
-					printf("\n");
-				}
-				graph(full,hitf,1);
-			default:break;
+			case 1:
+			case 2:
+			case 3:break;
+			case 4:pr=(pr+1)%2;
+				printf("Table will %sbe printed\n\n",(pr==1)?"":"not ");
+				continue;
+			case 5:exit(0);
+			default:printf("\nWrong Input\n");
 		}
+		for(int i = 0;i < full;i++){
+			switch(ch){
+				case 1:hitf[full+i] = FIFO(fs+i,c,arr,pr); break;
+				case 2:hitf[full+i] = OPT(fs+i,c,arr,pr); break;
+				case 3:hitf[full+i] = LRU(fs+i,c,arr,pr); break;
+			}
+			if(pr==1) printf("Hit Ratio : %d/%d\n\n",hitf[full+i],c);
+		}
+		printf("\nNo. of Frames vs Hits\n");
+		graph(full,hitf,0);
+		printf("\n");
 	}
 }
