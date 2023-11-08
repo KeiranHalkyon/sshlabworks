@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
 struct Node{
 	int pid, start, length;
@@ -7,7 +8,7 @@ struct Node{
 };
 typedef struct Node Node;
 
-void alloc(Node *head, int pid, int length){
+Node* allocN(Node *head, int pid, int length){
 	Node *proc=(Node *)malloc(sizeof(Node)), *hole=head->next;
 	proc->pid=pid;
 	proc->start=hole->start;
@@ -20,10 +21,11 @@ void alloc(Node *head, int pid, int length){
 	}
 	else proc->next=hole;
 	head->next=proc;
+	return proc;
 }
 
-int dealloc(Node *head, int pid){
-	Node *pre=head, *temp=head->next;
+Node* deallocN(Node *head, int pid){
+	Node *pre=head, *temp=head->next, *toRet=NULL;
 	while(temp!=NULL){
 		if(temp->pid!=pid){
 			pre=temp;
@@ -31,6 +33,7 @@ int dealloc(Node *head, int pid){
 			continue;
 		}
 		temp->pid=-1;
+		toRet=temp;
 		if(temp->next->pid==-1){
 			Node *nt=temp->next;
 			temp->length+=nt->length;
@@ -41,10 +44,11 @@ int dealloc(Node *head, int pid){
 			pre->length+=temp->length;
 			pre->next=temp->next;
 			free(temp);
+			toRet=pre;
 		}
-		return 1;
+		return toRet;
 	}
-	return 0;
+	return toRet;
 }
 
 Node* firstFit(Node *head,int val){
@@ -80,9 +84,8 @@ Node* bestFit(Node *head,int val){
 		 		 	var=temp->length;
 		 		 	temp2=temp1;
 				}
-				//return temp2;
 			}
-		}	
+		}
 		temp1=temp;
 		temp=temp->next;
 	}
@@ -97,17 +100,12 @@ Node* worstFit(Node *head,int val){
 	int var=-1;//variable to store lengthth of hole
 	while(temp!=NULL){
 		if(temp->pid<0){//hole finding
-			if((temp->length)-val>0){
+			if((temp->length)-val>=0){
 		        if((var-(temp->length)<0 && var!=-1) || var==-1){
 		 		 	var=temp->length;
 		 		 	temp2=temp1;
 				}
-				//return temp2;
 			}
-			/*else{//process encountered
-				temp1=temp;
-				temp=temp->next;
-			}*/
 		}
 		temp1=temp;
 		temp=temp->next;
@@ -118,48 +116,113 @@ Node* worstFit(Node *head,int val){
 void printL(Node *head){
 	Node *temp=head->next;
 	while(temp!=NULL){
-		printf("PID : %d\tStart : %d\tLength : %d\n",temp->pid,temp->start,temp->length);
+        if(temp->pid>=0)
+            printf("PID : %d",temp->pid);
+        else printf("HOLE");
+		printf("\tStart : %d\tLength : %d\n",temp->start,temp->length);
 		temp=temp->next;
 	}
 }
 
-void printN(Node *head){
-	if(head==NULL){
-		printf("Null pointer\n");
-		return;
-	}
-	printf("PID : %d\tStart : %d\tLength : %d\n",head->pid,head->start,head->length);
+void printGV(Node* he) {
+	Node *head=he;
+
+    head = head->next;
+    while (head != NULL) {
+        if (head->pid > 0) {
+            printf("%02d +++++ PID %d\n", head->start, head->pid);
+            for (int i = 1; i < head->length; i++) {
+                printf("   +++++\n");
+            }
+        }
+		else{
+            printf("%02d xxxxx HOLE\n", head->start);
+            for (int i = 1; i < head->length; i++) {
+                printf("   xxxxx\n");
+            }
+        }
+        head = head->next;
+    }
 }
 
-/*void memPlot(Node *head){
-	Node *temp=head->next;
-	int l;
-	while(temp!=NULL){
-		printf("-------\n");
-		char ch=(temp->pid>=0)?'#':'x';
-	}
-}*/
-
-int main(){
+Node* newMem(int length){
 	Node *head=(Node*)malloc(sizeof(Node)), *temp;
 	head->pid=head->start=head->length=-2;
 
 	head->next=(Node*)malloc(sizeof(Node));
 	head->next->pid=-1;
 	head->next->start=0;
-	head->next->length=100;
+	head->next->length=length;
+	return head;
+}
 
-	//printL(head);
-	alloc(head,112,4);
-	//printL(head);
-	alloc(head->next,3456,50);
-	printL(head);
-	printf("------------------\n");
-	int dl=dealloc(head,112);
-	printL(head);
-	printf("D : %d\n-----------\n",dl);
-	/*dl=dealloc(head,3456);
-	printL(head);*/
-	temp=worstFit(head,3);
-	printN(temp);
+void freeMem(Node *head){
+	if(head==NULL)
+		return;
+	freeMem(head->next);
+	free(head);
+}
+
+int chAlgo(){
+	int ch=-1;
+	while(1){
+		printf("1. First Fit\n2. Best Fit\n3. Worst Fit\nChoose Algo : ");
+		scanf("%d",&ch);
+		if(ch>=0 && ch<=3)
+			return ch;
+		printf("Invalid Input\n\n");
+	}
+}
+
+int main(){
+	int maxl, ch=-1, algo, pid=1;
+	printf("Enter memory size : ");
+	scanf("%d",&maxl);
+	algo=chAlgo();
+
+	Node *head=newMem(maxl);
+
+	while(ch!=6){
+		printf("\n\n1. Clear Memory\n2. Change Algo\n3. Create New Process\n4. Remove Existing Process\n5. Display Graph\n6. Exit\nEnter Choice : ");
+		scanf("%d",&ch);
+		switch(ch){
+			case 1 :freeMem(head);
+					head=newMem(maxl);
+					printf("\nMemory Cleared\n\n");
+					break;
+			case 2 :algo=chAlgo();
+					break;
+			case 3 :int pLen;
+					Node *change;
+					printf("\nEnter process size : ");
+					scanf("%d",&pLen);
+					switch(algo){
+						case 1 :change=firstFit(head,pLen);break;
+						case 2 :change=bestFit(head,pLen);break;
+						case 3 :change=worstFit(head,pLen);break;
+					}
+					if(change==NULL)
+						printf("\nSpace not available\n\n");
+					else{
+						change=allocN(change,pid++,pLen);
+						printf("\nProcess allocated as PID %d at %d\n\n",change->pid,change->start);
+					}
+					break;
+			case 4 :int rpid;
+					printf("\nEnter PID : ");
+					scanf("%d",&rpid);
+					Node *newHole=deallocN(head,rpid);
+					if(newHole==NULL)
+						printf("\nProcess not found\n\n");
+					else
+						printf("\nProcess removed\nNew hole at %d\n\n",newHole->start);
+					break;
+			case 5 :printf("\n------------------\n\n");
+					printGV(head);
+					printf("\n------------------\n\n");
+                    break;
+			case 6 :break;
+			default:printf("\nWrong Input\n\n");
+		}
+	}
 }
